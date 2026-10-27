@@ -1,106 +1,90 @@
 import { useCallback, useEffect, useState } from 'react'
-import type { Task } from './db'
-import { deleteTask, ensurePersistence, errMsg, getMeta, listTasks, newId, putTask, setMeta } from './db'
-import { Backup, Home, LIMITS, Tasks } from './Views'
-import type { Api } from './Views'
+import type { AppData, CalendarEvent } from './types'
+import { loadAppData, saveAppData } from './storage'
+import Dashboard from './components/Dashboard'
+import QuestionBank from './components/QuestionBank'
+import AcademicCalendar from './components/AcademicCalendar'
+import Disciplines from './components/Disciplines'
+import Backup from './components/Backup'
+import { Button, Icon, type IconName } from './components/UI'
 
-type View = 'home' | 'tasks' | 'backup'
-const NAV: { id: View; label: string }[] = [
-  { id: 'home', label: 'Início' },
-  { id: 'tasks', label: 'Tarefas' },
-  { id: 'backup', label: 'Backup' },
+type View = 'dashboard' | 'questions' | 'calendar' | 'disciplines' | 'backup'
+const NAV: { id: View; label: string; icon: IconName; section: 'main' | 'manage' }[] = [
+  { id: 'dashboard', label: 'Visão geral', icon: 'home', section: 'main' },
+  { id: 'questions', label: 'Banco de questões', icon: 'book-open', section: 'manage' },
+  { id: 'calendar', label: 'Calendário acadêmico', icon: 'calendar', section: 'manage' },
+  { id: 'disciplines', label: 'Minhas disciplinas', icon: 'layers', section: 'manage' },
+  { id: 'backup', label: 'Backup e preferências', icon: 'archive', section: 'manage' },
 ]
-
-function Capture({ onSave, onClose }: { onSave: (t: Task) => void; onClose: () => void }) {
-  const [text, setText] = useState('')
-  const submit = () => {
-    const v = text.trim()
-    if (!v) return
-    onSave({ id: newId(), title: v, status: 'inbox', priority: false, createdAt: Date.now() })
-    onClose()
-  }
-  return (
-    <div className="fixed inset-0 z-30 flex items-end justify-center bg-black/30 p-4 sm:items-center" role="dialog" aria-modal="true" aria-label="Capturar agora" onClick={onClose}>
-      <div className="w-full max-w-md rounded-2xl bg-white p-4 shadow-lg" onClick={e => e.stopPropagation()}>
-        <input autoFocus className="w-full rounded-xl border border-stone-300 px-3 py-2" placeholder="O que você quer registrar?" value={text}
-          onChange={e => setText(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') submit(); if (e.key === 'Escape') onClose() }} aria-label="Ideia, tarefa ou data" />
-        <p className="mt-2 text-xs text-stone-500">Vai para a caixa de entrada. Você organiza depois.</p>
-        <div className="mt-3 flex justify-end gap-2">
-          <button className="rounded-xl border border-stone-300 px-3 py-2 text-sm" onClick={onClose}>Cancelar</button>
-          <button className="rounded-xl bg-terracotta px-3 py-2 text-sm text-white" onClick={submit}>Salvar na caixa de entrada</button>
-        </div>
-      </div>
-    </div>
-  )
+const VIEW_TITLES: Record<View, string> = {
+  dashboard: 'Visão geral', questions: 'Banco de questões', calendar: 'Calendário acadêmico', disciplines: 'Minhas disciplinas', backup: 'Backup e preferências',
 }
 
 export default function App() {
-  const [view, setView] = useState<View>('home')
-  const [tasks, setTasks] = useState<Task[]>([])
-  const [error, setError] = useState('')
-  const [capture, setCapture] = useState(false)
-  const [welcome, setWelcome] = useState(false)
+  const [view, setView] = useState<View>('dashboard')
+  const [data, setData] = useState<AppData>(() => loadAppData())
+  const [toast, setToast] = useState('')
+  const [eventToEdit, setEventToEdit] = useState<CalendarEvent | null>(null)
+  const [storageError, setStorageError] = useState('')
 
-  const reload = useCallback(async () => {
-    try { setTasks(await listTasks()); setError('') } catch (e) { setError(errMsg(e)) }
+  useEffect(() => {
+    try {
+      saveAppData(data)
+      setStorageError('')
+    } catch {
+      setStorageError('O navegador não conseguiu salvar as últimas alterações. Verifique o espaço disponível ou exporte seus dados.')
+    }
+  }, [data])
+
+  const updateData = useCallback((updater: (current: AppData) => AppData) => setData(current => updater(current)), [])
+  const notify = useCallback((message: string) => {
+    setToast(message)
+    window.setTimeout(() => setToast(current => current === message ? '' : current), 3200)
+  }, [])
+  const clearEventToEdit = useCallback(() => setEventToEdit(null), [])
+  const navigateToEvent = useCallback((event: CalendarEvent) => {
+    setEventToEdit(event)
+    setView('calendar')
   }, [])
 
   useEffect(() => {
-    ;(async () => {
-      await reload()
-      try { setWelcome(!(await getMeta<boolean>('welcomed'))) } catch { /* sem armazenamento */ }
-      ensurePersistence()
-    })()
-  }, [reload])
+    const dismiss = () => updateData(old => ({ ...old, welcomeDismissed: true }))
+    window.addEventListener('tdahmed:dismiss-welcome', dismiss)
+    return () => window.removeEventListener('tdahmed:dismiss-welcome', dismiss)
+  }, [updateData])
 
-  const api: Api = {
-    tasks,
-    reload,
-    save: async t => { try { await putTask(t); await reload() } catch (e) { setError(errMsg(e)) } },
-    remove: async id => { try { await deleteTask(id); await reload() } catch (e) { setError(errMsg(e)) } },
+  const activeNav = NAV.find(n => n.id === view)
+  const avatarLetter = data.profileName.trim().charAt(0).toLocaleUpperCase('pt-BR') || 'M'
+
+  const renderPage = () => {
+    if (view === 'dashboard') return <Dashboard data={data} onNavigate={setView} onEventClick={navigateToEvent}/>
+    if (view === 'questions') return <QuestionBank data={data} updateData={updateData}/>
+    if (view === 'calendar') return <AcademicCalendar data={data} updateData={updateData} initialEditEvent={eventToEdit} onInitialEditHandled={clearEventToEdit}/>
+    if (view === 'disciplines') return <Disciplines data={data} updateData={updateData} notify={notify}/>
+    return <Backup data={data} updateData={updateData} replaceData={setData} notify={notify}/>
   }
 
-  const closeWelcome = async () => { setWelcome(false); try { await setMeta('welcomed', true) } catch { /* ignora */ } }
-
-  return (
-    <div className="min-h-screen md:flex">
-      <nav className="hidden w-52 shrink-0 border-r border-stone-200 p-4 md:block" aria-label="Principal">
-        <p className="mb-6 font-serif text-xl text-navy">TDAHMED</p>
-        <ul className="space-y-1">
-          {NAV.map(n => (
-            <li key={n.id}>
-              <button onClick={() => setView(n.id)} aria-current={view === n.id ? 'page' : undefined}
-                className={`w-full rounded-xl px-3 py-2 text-left ${view === n.id ? 'bg-navy text-white' : 'hover:bg-stone-100'}`}>{n.label}</button>
-            </li>
-          ))}
-        </ul>
+  return <div className="app-shell">
+    <aside className="sidebar">
+      <button className="brand-lockup" onClick={() => setView('dashboard')} aria-label="TDAHMED, voltar ao início"><span className="brand-symbol"><span>t</span><i/></span><span className="brand-text"><strong>TDAHMED</strong><small>ACADEMIC STUDIO</small></span></button>
+      <div className="sidebar-profile"><div className="profile-avatar">{avatarLetter}</div><div className="profile-label"><strong>{data.profileName.trim() || 'Meu espaço'}</strong><small>Estudante de Medicina</small></div><span className="profile-menu-dot">···</span></div>
+      <nav className="sidebar-nav" aria-label="Navegação principal">
+        <p className="nav-section-label">SEU ESPAÇO</p>
+        {NAV.filter(n => n.section === 'main').map(n => <button key={n.id} className={`nav-item ${view === n.id ? 'active' : ''}`} onClick={() => setView(n.id)} aria-current={view === n.id ? 'page' : undefined}><span className="nav-icon"><Icon name={n.icon} size={19}/></span><span>{n.label}</span>{view === n.id && <span className="nav-active-mark"/>}</button>)}
+        <p className="nav-section-label nav-section-manage">FERRAMENTAS ACADÊMICAS</p>
+        {NAV.filter(n => n.section === 'manage').map(n => <button key={n.id} className={`nav-item ${view === n.id ? 'active' : ''}`} onClick={() => setView(n.id)} aria-current={view === n.id ? 'page' : undefined}><span className="nav-icon"><Icon name={n.icon} size={19}/></span><span>{n.label}</span>{n.id === 'questions' && data.mistakeIds.length > 0 && <span className="nav-count">{data.mistakeIds.length}</span>}{view === n.id && <span className="nav-active-mark"/>}</button>)}
       </nav>
+      <div className="sidebar-bottom"><div className="semester-card"><div className="semester-card-icon"><Icon name="sparkles" size={17}/></div><strong>Seu semestre, no seu ritmo.</strong><p>Um lugar para organizar a jornada, uma etapa de cada vez.</p><button onClick={() => setView('disciplines')}>Organizar meus estudos <Icon name="arrow" size={13}/></button><div className="semester-art"><span/><span/><span/></div></div><div className="storage-status"><span className={`storage-dot ${storageError ? 'storage-dot-error' : ''}`}/><span>{storageError ? 'Falha ao salvar' : 'Salvo neste navegador'}</span><button title="Informações sobre armazenamento" onClick={() => setView('backup')}><Icon name="alert" size={14}/></button></div></div>
+    </aside>
 
-      <main className="mx-auto w-full max-w-2xl flex-1 p-4 pb-32 md:p-8 md:pb-24">
-        {welcome && (
-          <div className="mb-6 rounded-2xl border border-navy/30 bg-white p-4 text-sm" role="note">
-            <p className="font-serif text-lg">Antes de começar</p>
-            <p className="mt-1 text-stone-700">{LIMITS}</p>
-            <button className="mt-3 rounded-xl border border-stone-300 px-3 py-2" onClick={closeWelcome}>Entendi</button>
-          </div>
-        )}
-        {error && <p role="alert" className="mb-4 rounded-xl border border-terracotta/40 bg-white p-3 text-sm text-terracotta">{error}</p>}
-        {view === 'home' && <Home api={api} />}
-        {view === 'tasks' && <Tasks api={api} />}
-        {view === 'backup' && <Backup api={api} />}
-      </main>
+    <main className="main-panel">
+      <header className="topbar"><div className="mobile-brand"><span className="brand-symbol"><span>t</span><i/></span><strong>TDAHMED</strong></div><div className="breadcrumb"><span>Meu espaço</span><Icon name="chevron" size={14}/><strong>{VIEW_TITLES[view]}</strong></div><div className="topbar-actions"><span className="local-pill"><i/> Seus dados ficam no aparelho</span><button className="topbar-avatar" onClick={() => setView('backup')} aria-label="Abrir preferências">{avatarLetter}</button></div></header>
+      {storageError && <div className="storage-error-banner" role="alert"><Icon name="alert" size={16}/><span>{storageError}</span><button onClick={() => setView('backup')}>Backup e preferências</button></div>}
+      <div className="page-content">{renderPage()}</div>
+      <footer className="app-footer"><span>© TDAHMED · Academic Studio</span><span>Feito para acompanhar sua jornada em Medicina <b>✦</b></span></footer>
+    </main>
 
-      <button onClick={() => setCapture(true)}
-        className="fixed bottom-20 right-4 z-20 rounded-full bg-terracotta px-5 py-3 text-white shadow-lg md:bottom-6 md:right-6">Capturar agora</button>
-
-      <nav className="fixed inset-x-0 bottom-0 z-10 flex border-t border-stone-200 bg-ivory md:hidden" aria-label="Principal">
-        {NAV.map(n => (
-          <button key={n.id} onClick={() => setView(n.id)} aria-current={view === n.id ? 'page' : undefined}
-            className={`flex-1 py-4 text-sm ${view === n.id ? 'font-semibold text-navy' : 'text-stone-600'}`}>{n.label}</button>
-        ))}
-      </nav>
-
-      {capture && <Capture onSave={t => { api.save(t) }} onClose={() => setCapture(false)} />}
-    </div>
-  )
+    <nav className="mobile-nav" aria-label="Navegação móvel">{NAV.filter(n => n.id !== 'backup').map(n => <button key={n.id} className={view === n.id ? 'active' : ''} onClick={() => setView(n.id)} aria-current={view === n.id ? 'page' : undefined}><Icon name={n.icon} size={20}/><span>{n.id === 'dashboard' ? 'Início' : n.id === 'questions' ? 'Questões' : n.id === 'calendar' ? 'Calendário' : 'Disciplinas'}</span>{view === n.id && <i/>}</button>)}</nav>
+    {toast && <div className="toast-message" role="status"><Icon name="circle-check" size={18}/>{toast}<button onClick={() => setToast('')} aria-label="Fechar aviso"><Icon name="close" size={15}/></button></div>}
+  </div>
 }

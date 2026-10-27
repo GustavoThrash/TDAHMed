@@ -1,0 +1,14 @@
+{
+  "name": "TDAHMED · Academic Studio",
+  "short_name": "TDAHMED",
+  "description": "Organizador acadêmico para estudantes de Medicina.",
+  "lang": "pt-BR",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f1eee5",
+  "theme_color": "#f1eee5",
+  "icons": [
+    { "src": "./icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

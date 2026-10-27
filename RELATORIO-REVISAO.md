@@ -1,25 +1,29 @@
-# Relatório de revisão — TDAHMED para GitHub Pages
+# TDAHMED — relatório da versão Academic Studio
 
-## Causa da página vazia ao abrir o arquivo localmente
+## Escopo entregue
 
-O `index.html` é a entrada de um projeto React + TypeScript + Vite, não um arquivo HTML autônomo. O navegador não compila o código TSX ao abrir o arquivo com `file://`. Para uso normal, este projeto deve ser compilado e publicado como site no GitHub Pages. A pessoa que usa o site não precisa instalar nada nos dispositivos.
+O antigo painel com tarefas foi ampliado para um organizador acadêmico com três áreas principais: Banco de Questões, Calendário Acadêmico e Painel de Disciplinas. A estrutura foi separada por componentes para facilitar a manutenção e cada recurso principal possui interações de cadastro, atualização, busca/filtro e remoção onde se aplica.
 
-## Alterações feitas para publicação
+## Funcionalidades implementadas
 
-- `index.html`: mensagem visível caso a aplicação não carregue e caminho relativo para o ponto de entrada do Vite.
-- `src/main.tsx`: fronteira de erro do React para apresentar mensagem em vez de deixar a interface sem explicação após uma falha de renderização.
-- `src/db.ts`: recuperação da conexão IndexedDB após erro temporário e fechamento da conexão quando o navegador pede mudança de versão.
-- `.github/workflows/deploy.yml`: publicação automatizada pelo GitHub Actions quando houver envio para a branch `main` ou `master`.
-- `.nojekyll`: evita processamento desnecessário do site pelo Jekyll do GitHub Pages.
-- `README.md`: instruções focadas no uso como site hospedado, configuração do Pages e limites funcionais.
+- Questões de múltipla escolha, explicação da resposta, dificuldade, tags, favoritas, pesquisa por texto e disciplina, prática com feedback e fila de erros.
+- Calendário mensal, seleção de dia, filtro por categoria, cadastro/edição/exclusão de eventos, conclusão de compromissos e resumo de próximos dias.
+- Sete disciplinas de início, personalização de nome/ícone/cor, professor/sala, tópicos com notas e estados, grade semanal, links e PDFs locais.
+- Backup e restauração dos dados e dos PDFs associados (arquivos PDF até 25 MB no conjunto por exportação; cada PDF até 10 MB).
+- Layout responsivo, navegação móvel, mensagens de erro, PWA e publicação por GitHub Actions.
 
-## Verificações
+## Armazenamento e publicação
 
-- JSON de `package.json` e `tsconfig.json`: válido.
-- Configuração do Vite: usa caminho relativo adequado para repositórios do GitHub Pages.
-- Workflow: compila com `npm run build` e publica o diretório `dist`.
-- **Build executável completo:** não foi possível concluir nesta sessão porque a instalação das dependências via npm expirou sem terminar. O próprio GitHub Actions tentará instalar as dependências ao publicar; verifique a aba **Actions** após enviar os arquivos.
+A publicação usa Vite e GitHub Pages. Os registros estruturados ficam no localStorage e os arquivos PDF no IndexedDB do navegador. Não há servidor próprio nem autenticação nessa versão; dados não sincronizam entre dispositivos. O backup é a forma de transferência manual.
 
-## Funções existentes e pendentes
+## Verificações realizadas nesta sessão
 
-O código fornecido contém painel do dia, captura e gestão de tarefas e exportação/restauração de backup JSON. Ainda não contém organizador de PDFs, grade horária, agenda/calendário nem cadastro de provas. Também usa IndexedDB local: os dados não se sincronizam automaticamente entre aparelhos. Esses recursos precisam de desenvolvimento adicional e, para sincronização, de armazenamento em nuvem.
+- Os arquivos `.ts` e `.tsx` passaram por transpilation de sintaxe do TypeScript sem erros de parsing.
+- Revisadas as rotas de navegação, as formas de estado e a configuração relativa do Vite para funcionar em uma URL de projeto do GitHub Pages.
+- A compilação completa (`tsc --noEmit && vite build`) não pôde ser executada no ambiente desta sessão porque o acesso ao registro npm expirou durante a instalação das dependências. O GitHub Actions realizará a instalação e compilação na publicação. Se o workflow falhar, a mensagem na aba Actions indicará o erro restante.
+
+## Limitações conhecidas
+
+- Os dados são locais a cada navegador; sincronização em nuvem exigirá serviço de backend e autenticação.
+- PDFs anexados são armazenados no dispositivo/browser, não dentro do repositório GitHub. O espaço disponível depende do navegador e aparelho.
+- Dados iniciais de exemplo são editáveis e não representam a grade oficial da faculdade.

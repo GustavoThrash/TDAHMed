@@ -1,50 +1,72 @@
-# TDAHMED — publicação como site pelo GitHub Pages
+# TDAHMED · Academic Studio
 
-O TDAHMED pode ser usado pelo navegador como um site. **Você não precisa instalar Node.js, executar comandos ou instalar o projeto nos aparelhos onde vai usar o site.** O GitHub Actions compila e publica o aplicativo automaticamente.
+**Seu organizador acadêmico de Medicina, acessível por um link.** O site foi preparado para publicação no GitHub Pages; para usar a versão publicada, não é necessário instalar nada no celular, tablet ou computador.
 
-## Publicar pela primeira vez
+## Funcionalidades
 
-1. Crie um repositório no GitHub para o TDAHMED.
-2. Envie **todo o conteúdo desta pasta diretamente para a raiz do repositório**. O arquivo `package.json`, `index.html` e a pasta `.github` precisam ficar na raiz; não deixe tudo dentro de uma subpasta `tdahmed`.
-3. No GitHub, abra **Settings → Pages**.
-4. Em **Build and deployment**, escolha **GitHub Actions** como Source.
-5. Abra a aba **Actions** e aguarde o workflow **Publicar no GitHub Pages** terminar com um sinal verde. O workflow executa a compilação e publica a pasta `dist`.
-6. Volte a **Settings → Pages** para encontrar o endereço publicado. Normalmente será `https://SEU-USUARIO.github.io/NOME-DO-REPOSITORIO/`. Use esse endereço, não o endereço da página de arquivos do repositório (`github.com/...`).
+### 1. Banco de questões
+- Cadastre questões de múltipla escolha com quatro alternativas, resposta correta e explicação.
+- Organize por disciplina, dificuldade, tags e favoritas.
+- Busque questões por texto, disciplina ou tag.
+- Pratique em modo quiz, veja feedback e registre acertos/tentativas.
+- Reúna questões erradas em uma lista de revisão.
 
-O workflow executa automaticamente quando você envia alterações para a branch `main` ou `master`. Depois da primeira configuração, para atualizar o site basta enviar os novos arquivos ao GitHub e aguardar a publicação.
+### 2. Calendário acadêmico
+- Visualização mensal interativa com filtros por tipo de compromisso.
+- Cadastre provas, trabalhos/entregas, apresentações, aulas e datas importantes.
+- Defina disciplina, data, horário, local, observações e status de conclusão.
+- Veja o resumo do dia e os próximos compromissos no painel inicial.
 
-## Se o site não abrir
+### 3. Painel de disciplinas
+- Já vem com Anatomia, Biologia, Histologia, Psicologia Médica, Primeiros Auxílios, Língua Castelhana e Biofísica.
+- Personalize nome, emoji/ícone, cor, professor, sala e descrição de cada disciplina.
+- Registre tópicos e aulas, escreva notas e acompanhe o progresso.
+- Monte a grade semanal por dia, horário e sala.
+- Anexe PDFs de até 10 MB por arquivo ou salve links para materiais online.
 
-- Abra a aba **Actions** e veja se **Publicar no GitHub Pages** terminou com sucesso.
-- Se a execução falhar, abra a execução para ver a etapa e a mensagem que falharam.
-- Confirme que `package.json` e `.github/workflows/deploy.yml` estão na raiz do repositório e que **Settings → Pages → Source** está definido como **GitHub Actions**.
-- Após uma publicação recente, atualize o site; se necessário, faça uma recarga completa no navegador.
+### Também incluído
+- Painel de início com próximos compromissos, progresso e atalhos.
+- Backup completo em JSON com registros e PDFs anexados (até 25 MB de arquivos PDF por exportação).
+- Restauração de backup para transferência manual entre dispositivos.
+- Layout responsivo para celular, tablet e computador.
+- Manifesto de PWA e cache de recursos já visitados, para permitir a opção “Adicionar à tela inicial” quando o navegador oferecer essa opção.
 
-## O que esta versão já contém
+## Publicar como site no GitHub Pages
 
-- Painel “Meu dia”.
-- Captura rápida e lista de tarefas com prazo, prioridade, conclusão e adiamento.
-- Backup e restauração em arquivo JSON.
-- Interface adaptável a computadores, tablets e celulares.
-- Armazenamento local pelo IndexedDB do navegador.
+1. Crie um repositório no GitHub.
+2. Envie **todo o conteúdo desta pasta para a raiz do repositório**. O arquivo `package.json`, `index.html`, a pasta `src`, a pasta `public` e a pasta `.github` precisam ficar na raiz.
+3. No repositório, abra **Settings → Pages**.
+4. Em **Build and deployment**, escolha **GitHub Actions** como origem.
+5. Abra a aba **Actions** e confira a execução **Publicar no GitHub Pages**. O fluxo instala as dependências, valida os tipos, compila o site e publica a pasta `dist`.
+6. Quando a execução terminar com sucesso, abra **Settings → Pages** para acessar o endereço publicado. Em geral, ele será `https://SEU-USUARIO.github.io/NOME-DO-REPOSITORIO/`.
 
-## Recursos que ainda faltam
+Depois da configuração inicial, envie atualizações ao repositório e o GitHub Actions publicará a nova versão automaticamente. Para instruções oficiais, consulte [GitHub Pages com GitHub Actions](https://docs.github.com/pt/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site).
 
-Esta é a primeira etapa da aplicação. Ela **ainda não inclui** gerenciamento de PDFs, grade horária, agenda/calendário ou cadastro de provas. Esses módulos precisam ser construídos.
+## Usar pelo celular ou tablet
 
-## Importante: dados em vários aparelhos
+Abra o endereço do GitHub Pages no navegador. Não abra a página de arquivos `github.com/...` como se fosse o aplicativo; use o endereço publicado `github.io/...`.
 
-O site pode ser aberto em vários aparelhos, mas nesta versão os dados são guardados localmente em cada navegador. **As tarefas não se sincronizam automaticamente entre o celular, tablet e computador.** Para isso, será preciso adicionar um banco de dados na nuvem e autenticação ou outro mecanismo de sincronização. Até lá, use o recurso de backup para transferir dados manualmente.
+Se o navegador oferecer **Adicionar à tela inicial**, você pode criar um atalho com aparência de aplicativo. Isso não é obrigatório. O TDAHMED continua funcionando como site.
 
-O GitHub Pages hospeda a interface do site, mas não oferece por si só um banco de dados privado para salvar e sincronizar os dados do usuário.
+## Dados, privacidade e sincronização
+
+O GitHub Pages hospeda os arquivos do site; ele não é o banco de dados pessoal do usuário. Nesta versão, os registros acadêmicos ficam no armazenamento local do navegador e os PDFs ficam no IndexedDB local. Isso significa:
+
+- O que você cria no celular não aparece automaticamente no tablet ou computador.
+- Limpar os dados do site/navegador pode apagar registros e PDFs locais.
+- Use **Backup e preferências → Baixar backup completo** com frequência e guarde o JSON fora do repositório público.
+- Para levar os dados a outro dispositivo, abra o site nele e restaure o JSON. Para sincronização automática será necessário integrar uma base de dados em nuvem e autenticação.
+- Não coloque backups, PDFs pessoais ou outros dados privados no repositório GitHub.
+
+Os primeiros tópicos das disciplinas, a questão inicial e os eventos que contêm “Exemplo” são **conteúdo demonstrativo editável**. Substitua pelas informações reais do seu curso ou exclua-os. As matérias e sugestões não representam um programa oficial da sua faculdade.
 
 ## Desenvolvimento local (opcional)
 
-Só é necessário se você quiser modificar e testar o código no seu computador. Com Node.js instalado, execute na pasta do projeto:
+Apenas para quem deseja modificar o código. É necessário Node.js e npm:
 
 ```bash
 npm install
 npm run dev
 ```
 
-Para o uso normal do site publicado, esses passos não são necessários.
+Para uso normal da versão publicada, não é necessário instalar Node.js ou executar comandos nos dispositivos.

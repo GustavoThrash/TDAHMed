@@ -1,53 +1,50 @@
-# TDAHMED
+# TDAHMED — publicação como site pelo GitHub Pages
 
-Organizador acadêmico pessoal desenvolvido com React, TypeScript e Vite.
+O TDAHMED pode ser usado pelo navegador como um site. **Você não precisa instalar Node.js, executar comandos ou instalar o projeto nos aparelhos onde vai usar o site.** O GitHub Actions compila e publica o aplicativo automaticamente.
 
-## Como iniciar no Windows
+## Publicar pela primeira vez
 
-1. Extraia a pasta do projeto inteira para um local do computador.
-2. Instale uma versão LTS do [Node.js](https://nodejs.org/) caso ainda não tenha instalado. O instalador inclui o npm.
-3. Dê duplo clique em `INICIAR-TDAHMED.bat`.
-4. Na primeira execução, o script instalará as dependências. Depois abrirá o navegador em `http://localhost:5173`.
-5. Para fechar o aplicativo local, feche a janela do terminal que está executando o Vite.
+1. Crie um repositório no GitHub para o TDAHMED.
+2. Envie **todo o conteúdo desta pasta diretamente para a raiz do repositório**. O arquivo `package.json`, `index.html` e a pasta `.github` precisam ficar na raiz; não deixe tudo dentro de uma subpasta `tdahmed`.
+3. No GitHub, abra **Settings → Pages**.
+4. Em **Build and deployment**, escolha **GitHub Actions** como Source.
+5. Abra a aba **Actions** e aguarde o workflow **Publicar no GitHub Pages** terminar com um sinal verde. O workflow executa a compilação e publica a pasta `dist`.
+6. Volte a **Settings → Pages** para encontrar o endereço publicado. Normalmente será `https://SEU-USUARIO.github.io/NOME-DO-REPOSITORIO/`. Use esse endereço, não o endereço da página de arquivos do repositório (`github.com/...`).
 
-**Não abra `index.html` diretamente com duplo clique.** Esse arquivo é a entrada do projeto para o Vite e contém TypeScript/React que o navegador não executa diretamente como um site pronto.
+O workflow executa automaticamente quando você envia alterações para a branch `main` ou `master`. Depois da primeira configuração, para atualizar o site basta enviar os novos arquivos ao GitHub e aguardar a publicação.
 
-## Iniciar manualmente (Windows, macOS ou Linux)
+## Se o site não abrir
 
-Na pasta do projeto, abra um terminal e execute:
+- Abra a aba **Actions** e veja se **Publicar no GitHub Pages** terminou com sucesso.
+- Se a execução falhar, abra a execução para ver a etapa e a mensagem que falharam.
+- Confirme que `package.json` e `.github/workflows/deploy.yml` estão na raiz do repositório e que **Settings → Pages → Source** está definido como **GitHub Actions**.
+- Após uma publicação recente, atualize o site; se necessário, faça uma recarga completa no navegador.
+
+## O que esta versão já contém
+
+- Painel “Meu dia”.
+- Captura rápida e lista de tarefas com prazo, prioridade, conclusão e adiamento.
+- Backup e restauração em arquivo JSON.
+- Interface adaptável a computadores, tablets e celulares.
+- Armazenamento local pelo IndexedDB do navegador.
+
+## Recursos que ainda faltam
+
+Esta é a primeira etapa da aplicação. Ela **ainda não inclui** gerenciamento de PDFs, grade horária, agenda/calendário ou cadastro de provas. Esses módulos precisam ser construídos.
+
+## Importante: dados em vários aparelhos
+
+O site pode ser aberto em vários aparelhos, mas nesta versão os dados são guardados localmente em cada navegador. **As tarefas não se sincronizam automaticamente entre o celular, tablet e computador.** Para isso, será preciso adicionar um banco de dados na nuvem e autenticação ou outro mecanismo de sincronização. Até lá, use o recurso de backup para transferir dados manualmente.
+
+O GitHub Pages hospeda a interface do site, mas não oferece por si só um banco de dados privado para salvar e sincronizar os dados do usuário.
+
+## Desenvolvimento local (opcional)
+
+Só é necessário se você quiser modificar e testar o código no seu computador. Com Node.js instalado, execute na pasta do projeto:
 
 ```bash
 npm install
 npm run dev
 ```
 
-Acesse o endereço mostrado no terminal (normalmente `http://localhost:5173`). Para testar os arquivos de produção antes de publicar:
-
-```bash
-npm run build
-npm run preview
-```
-
-## Publicar no GitHub Pages
-
-1. Envie o conteúdo desta pasta para um repositório do GitHub, na branch `main`.
-2. Em **Settings > Pages**, selecione **Source: GitHub Actions**.
-3. Cada push em `main` executará `.github/workflows/deploy.yml` e publicará a pasta gerada em `dist`.
-4. Depois da publicação, o endereço ficará no formato `https://SEU-USUARIO.github.io/NOME-DO-REPOSITORIO/`.
-
-A publicação permite abrir a interface por navegador em computadores, tablets e celulares, sem iniciar o Vite em cada dispositivo.
-
-## O que esta versão contém
-
-- Painel “Meu dia”.
-- Captura rápida e lista de tarefas com prazo, prioridades, conclusão e adiamento.
-- Backup e restauração em JSON versionado.
-- Armazenamento local pelo IndexedDB do navegador.
-
-## Limitações importantes desta versão
-
-Esta pasta contém uma primeira etapa do aplicativo. **Ainda não há módulos para organizar PDFs, montar grade horária, agenda/calendário ou cadastrar provas.** Esses recursos precisam ser implementados separadamente.
-
-Os dados ficam apenas no navegador e dispositivo em que foram cadastrados. **Não existe sincronização automática entre celular, tablet e computador**, mesmo que todos abram o site publicado. Para compartilhar os mesmos dados entre dispositivos, será necessário adicionar uma camada de sincronização/armazenamento em nuvem. Use os arquivos de backup para transferir tarefas manualmente entre aparelhos por enquanto.
-
-Os dados locais não são criptografados. Limpar os dados do navegador ou desinstalar o navegador pode apagá-los. Faça backups regularmente.
+Para o uso normal do site publicado, esses passos não são necessários.

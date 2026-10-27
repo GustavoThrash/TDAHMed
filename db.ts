@@ -17,16 +17,39 @@ const STATUSES: Status[] = ['inbox', 'todo', 'doing', 'done', 'postponed']
 let dbp: Promise<IDBDatabase> | null = null
 function open(): Promise<IDBDatabase> {
   if (!dbp) {
-    dbp = new Promise((res, rej) => {
-      if (typeof indexedDB === 'undefined') return rej(new Error('Este navegador não oferece armazenamento local (IndexedDB).'))
-      const r = indexedDB.open(DB_NAME, DB_VERSION)
-      r.onupgradeneeded = () => {
-        const db = r.result
+    dbp = new Promise<IDBDatabase>((res, rej) => {
+      if (typeof indexedDB === 'undefined') {
+        rej(new Error('Este navegador não oferece armazenamento local (IndexedDB).'))
+        return
+      }
+
+      let request: IDBOpenDBRequest
+      try {
+        request = indexedDB.open(DB_NAME, DB_VERSION)
+      } catch (error) {
+        rej(error instanceof Error ? error : new Error('Não foi possível abrir o armazenamento local.'))
+        return
+      }
+
+      request.onupgradeneeded = () => {
+        const db = request.result
         if (!db.objectStoreNames.contains('tasks')) db.createObjectStore('tasks', { keyPath: 'id' })
         if (!db.objectStoreNames.contains('meta')) db.createObjectStore('meta')
       }
-      r.onsuccess = () => res(r.result)
-      r.onerror = () => { dbp = null; rej(r.error ?? new Error('Falha ao abrir o armazenamento local.')) }
+      request.onsuccess = () => {
+        const db = request.result
+        // Libera conexões antigas quando outra aba instalar uma versão nova do esquema.
+        db.onversionchange = () => {
+          db.close()
+          dbp = null
+        }
+        res(db)
+      }
+      request.onerror = () => rej(request.error ?? new Error('Falha ao abrir o armazenamento local.'))
+    }).catch(error => {
+      // Permite tentar novamente após um erro temporário de permissão/armazenamento.
+      dbp = null
+      throw error
     })
   }
   return dbp

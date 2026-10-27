@@ -4,10 +4,25 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#faf7f0" />
-    <title>TDAHMED</title>
+    <meta name="description" content="Organizador acadêmico pessoal TDAHMED." />
+    <title>TDAHMED — Organizador acadêmico</title>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- Mensagem de fallback: desaparece quando o React inicia normalmente. -->
+      <main style="font-family:system-ui,sans-serif;max-width:680px;margin:12vh auto;padding:24px;color:#2b2b2b;line-height:1.55">
+        <h1 style="color:#1f3a5f;margin-bottom:8px">TDAHMED</h1>
+        <p><strong>O aplicativo ainda não foi iniciado.</strong></p>
+        <p>Este projeto não funciona ao abrir o <code>index.html</code> diretamente pelo Explorador de Arquivos. Ele precisa ser iniciado pelo Vite.</p>
+        <ol>
+          <li>No Windows, execute <strong>INICIAR-TDAHMED.bat</strong> nesta pasta.</li>
+          <li>Ou abra um terminal nesta pasta e execute <code>npm install</code> e depois <code>npm run dev</code>.</li>
+          <li>Abra no navegador o endereço mostrado no terminal, normalmente <code>http://localhost:5173</code>.</li>
+        </ol>
+        <p>Se esta mensagem continuar aparecendo mesmo depois de iniciar o servidor, verifique se o terminal apresentou algum erro.</p>
+      </main>
+    </div>
+    <noscript>O TDAHMED precisa de JavaScript ativado no navegador.</noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
